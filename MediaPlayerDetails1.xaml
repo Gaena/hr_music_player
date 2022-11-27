@@ -1,0 +1,430 @@
+<hr:ContentPage xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:d="http://schemas.microsoft.com/expression/blend/2008" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" x:Name="MediaPlayerDetails" xmlns:hr="http://schemas.thehomeremote.com/winfx/2015/xaml">
+  <hr:Grid>
+    <hr:Grid>
+      <hr:Grid>
+        <hr:Grid x:Name="SourceImageGrid" Margin="16,0,16,0" HorizontalAlignment="Center">
+          <hr:ImageElement HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Image="albumart_background.png" Foreground="{StaticResource ForegroundBrush}" d:IsHidden="True" />
+          <hr:IconElement Opacity=".9" HorizontalAlignment="Center" VerticalAlignment="Center" IconSize="90" Icon="Music" Foreground="{StaticResource ForegroundBrush}" d:IsHidden="True" />
+          <hr:WebImage HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Source="{Binding @Device.AudioTrackData.AlbumArtUri}" Stretch="Uniform" d:IsHidden="True" />
+          <hr:Grid Grid.Row="1" VerticalAlignment="Top" IsVisible="False">
+            <hr:Label VerticalAlignment="Center" Foreground="{StaticResource ForegroundBrush4}" FontSize="12" Text="{Binding @Device.CurPosition}" />
+            <hr:Slider Grid.Column="2" VerticalAlignment="Center" Foreground="{StaticResource ForegroundBrush4}" Thumb="seekbar_thumb.png" ThumbSize="0" Minimum="0:00" Orientation="Horizontal" Maximum="{Binding @Device.TotalLength}" Value="{Binding @Device.CurPosition}" IsEnabled="False" />
+            <hr:Label Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Foreground="{StaticResource ForegroundBrush4}" FontSize="12" Text="{Binding @Device.TotalLength}" />
+            <hr:Grid.ColumnDefinitions>
+              <ColumnDefinition Width="Auto" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="12" />
+              <ColumnDefinition Width="Auto" />
+            </hr:Grid.ColumnDefinitions>
+            <hr:Grid.RowDefinitions />
+            <hr:Grid.Triggers>
+              <hr:DataTrigger Value=".*\S.*" IsRegularExpression="True" Binding="{Binding @Device.TotalLength}">
+                <hr:DataTrigger.Setters>
+                  <hr:Setter Property="IsVisible" Value="True" />
+                </hr:DataTrigger.Setters>
+              </hr:DataTrigger>
+            </hr:Grid.Triggers>
+          </hr:Grid>
+          <hr:Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </hr:Grid.RowDefinitions>
+        </hr:Grid>
+        <hr:Grid x:Name="SourceBrowserGrid" IsVisible="False" Margin="0,0,0,14" Background="{StaticResource BackgroundBrush2}">
+          <hr:Rectangle Height="1" Margin="0,0,0,0" Fill="{StaticResource ForegroundBrush4}" />
+          <hr:Grid Height="48" Grid.Row="1">
+            <hr:Button Width="48" Height="48" IsEnabled="False" HorizontalAlignment="Left" IconSize="20" Icon="ChevronLeft">
+              <hr:Button.Triggers>
+                <hr:EventTrigger Event="Clicked">
+                  <hr:EventTrigger.Actions>
+                    <hr:MethodAction TargetName="SourcesBrowser" Method="GoBack" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+                <hr:DataTrigger Value="True" Binding="{Binding ElementName=SourcesBrowser, Path=CanGoBack}">
+                  <hr:DataTrigger.Setters>
+                    <hr:Setter Property="IsEnabled" Value="True" />
+                  </hr:DataTrigger.Setters>
+                </hr:DataTrigger>
+              </hr:Button.Triggers>
+            </hr:Button>
+            <hr:Label Margin="48,0,48,0" HorizontalAlignment="Center" VerticalAlignment="Center" Text="{Binding ElementName=SourcesBrowser, Path=Title}" FontWeight="Bold" FontSize="15" TextTrimming="CharacterEllipsis" />
+            <hr:Button Width="48" Height="48" HorizontalAlignment="Right" IconSize="20" Icon="More">
+              <hr:Button.Triggers>
+                <hr:EventTrigger Event="Clicked">
+                  <hr:EventTrigger.Actions>
+                    <hr:MethodAction TargetName="SourcesBrowser" Method="GoToRoot" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+              </hr:Button.Triggers>
+            </hr:Button>
+            <hr:Grid.ColumnDefinitions />
+          </hr:Grid>
+          <hr:MediaBrowser x:Name="SourcesBrowser" Grid.Row="2" ItemsSource="{Binding @Device.MediaBrowser}" ItemPadding="16,0,0,0" ItemHeight="60" IconPosition="Left" IconSize="48" IconSpacing="16" HorizontalContentAlignment="Left" FontSize="15" />
+          <hr:GridView IsVisible="False" Grid.Row="2" ItemsSource="{Binding @Device.SupportedInputSources}" SelectedValue="{Binding @Device.InputSource}" ItemPadding="24,0,0,0" ItemHeight="60" IconPosition="Left" IconSize="48" IconSpacing="16" HorizontalContentAlignment="Left" FontSize="15" Columns="1">
+            <hr:GridView.Triggers>
+              <hr:DataTrigger Value="^((?!MediaBrowser).)*$" Binding="{Binding @Device.Capabilities}" IsRegularExpression="True">
+                <hr:DataTrigger.Setters>
+                  <hr:Setter Property="IsVisible" Value="True" />
+                </hr:DataTrigger.Setters>
+              </hr:DataTrigger>
+            </hr:GridView.Triggers>
+          </hr:GridView>
+          <hr:Rectangle Height="1" Grid.Row="3" Margin="0,0,0,0" VerticalAlignment="Bottom" Fill="{StaticResource ForegroundBrush4}" IsEnabled="True" />
+          <hr:Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+          </hr:Grid.RowDefinitions>
+        </hr:Grid>
+        <hr:Grid Grid.Row="1">
+          <hr:Grid>
+            <hr:StackPanel Margin="16,0,0,0" VerticalAlignment="Bottom">
+              <hr:Label Height="30" FontSize="20" Text="{Binding @Device.Title}" IsVisible="True">
+                <hr:Label.Triggers>
+                  <hr:DataTrigger Value="^$" IsRegularExpression="True" Binding="{Binding @Device.Title}">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsVisible" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Label.Triggers>
+              </hr:Label>
+              <hr:Label Height="30" FontSize="20" TextTrimming="CharacterEllipsis" IsVisible="True" Text="{Binding @Device.Album}">
+                <hr:Label.Triggers>
+                  <hr:DataTrigger Binding="{Binding @Device.Album}" Value=".*\S.*" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsVisible" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Label.Triggers>
+              </hr:Label>
+              <hr:Label Height="27" FontSize="15" TextTrimming="CharacterEllipsis" Text="{Binding Device.Artist}" IsVisible="True">
+                <hr:Label.Triggers>
+                  <hr:DataTrigger Value="" Binding="{Binding @Device.Artist}" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="Text" Value="{Binding @Device.Artist}" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Label.Triggers>
+              </hr:Label>
+            </hr:StackPanel>
+            <hr:Button Width="48" Height="34" IsVisible="False" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Top" IconSize="20" Icon="Link">
+              <hr:Button.Triggers>
+                <hr:EventTrigger Event="Clicked">
+                  <hr:EventTrigger.Actions>
+                    <hr:DataAction Binding="{Binding @Device.GroupCommand}" Value="Group" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+                <hr:DataTrigger Value="MediaGroup" Binding="{Binding @Device.Capabilities}" IsRegularExpression="True">
+                  <hr:DataTrigger.Setters>
+                    <hr:Setter Property="IsVisible" Value="True" />
+                  </hr:DataTrigger.Setters>
+                </hr:DataTrigger>
+              </hr:Button.Triggers>
+            </hr:Button>
+            <hr:Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="Auto" />
+            </hr:Grid.ColumnDefinitions>
+          </hr:Grid>
+          <hr:Grid Grid.Row="1">
+            <hr:StackPanel Orientation="Horizontal">
+              <hr:Button Width="48" Height="48" IconSize="20" Icon="Previous" IsEnabled="True">
+                <hr:Button.Triggers>
+                  <hr:EventTrigger Event="Clicked">
+                    <hr:EventTrigger.Actions>
+                      <hr:DataAction Binding="{Binding @Device.MediaCommand}" Value="SkipBackward" />
+                    </hr:EventTrigger.Actions>
+                  </hr:EventTrigger>
+                  <hr:DataTrigger Value="SkipBackward" Binding="{Binding @Device.SupportedMediaCommands}" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsEnabled" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Button.Triggers>
+              </hr:Button>
+              <hr:Canvas Width="48" Height="48" IsVisible="False">
+                <hr:Button Width="48" Height="48" IconSize="20" Icon="Play" IsVisible="False">
+                  <hr:Button.Triggers>
+                    <hr:EventTrigger Event="Clicked">
+                      <hr:EventTrigger.Actions>
+                        <hr:DataAction Binding="{Binding @Device.PlaybackStatus}" Value="Play" />
+                      </hr:EventTrigger.Actions>
+                    </hr:EventTrigger>
+                    <hr:DataTrigger Value="^Stop$|^Pause$|^$" Binding="{Binding @Device.PlaybackStatus}" IsRegularExpression="True">
+                      <hr:DataTrigger.Setters>
+                        <hr:Setter Property="IsVisible" Value="True" />
+                      </hr:DataTrigger.Setters>
+                    </hr:DataTrigger>
+                  </hr:Button.Triggers>
+                </hr:Button>
+                <hr:Button Width="48" Height="48" IsVisible="False" IconSize="20" Icon="Pause">
+                  <hr:Button.Triggers>
+                    <hr:EventTrigger Event="Clicked">
+                      <hr:EventTrigger.Actions>
+                        <hr:DataAction Binding="{Binding @Device.PlaybackStatus}" Value="Pause" />
+                      </hr:EventTrigger.Actions>
+                    </hr:EventTrigger>
+                    <hr:MultiDataTrigger>
+                      <hr:MultiDataTrigger.Setters>
+                        <hr:Setter Property="IsVisible" Value="True" />
+                      </hr:MultiDataTrigger.Setters>
+                      <hr:MultiDataTrigger.Conditions>
+                        <hr:Condition Binding="{Binding @Device.PlaybackStatus}" Value="^Play$" IsRegularExpression="True" />
+                        <hr:Condition Binding="{Binding @Device.SupportedMediaCommands}" Value="Pause" IsRegularExpression="True" />
+                      </hr:MultiDataTrigger.Conditions>
+                    </hr:MultiDataTrigger>
+                  </hr:Button.Triggers>
+                </hr:Button>
+                <hr:Button Width="48" Height="48" IsVisible="False" IconSize="20" Icon="Stop">
+                  <hr:Button.Triggers>
+                    <hr:EventTrigger Event="Clicked">
+                      <hr:EventTrigger.Actions>
+                        <hr:DataAction Binding="{Binding @Device.PlaybackStatus}" Value="Stop" />
+                      </hr:EventTrigger.Actions>
+                    </hr:EventTrigger>
+                    <hr:MultiDataTrigger>
+                      <hr:MultiDataTrigger.Setters>
+                        <hr:Setter Property="IsVisible" Value="True" />
+                      </hr:MultiDataTrigger.Setters>
+                      <hr:MultiDataTrigger.Conditions>
+                        <hr:Condition Binding="{Binding @Device.PlaybackStatus}" Value="^Play$" IsRegularExpression="True" />
+                        <hr:Condition Binding="{Binding @Device.SupportedMediaCommands}" Value="^((?!Pause).)*$" IsRegularExpression="True" />
+                      </hr:MultiDataTrigger.Conditions>
+                    </hr:MultiDataTrigger>
+                  </hr:Button.Triggers>
+                </hr:Button>
+                <hr:Canvas.Triggers>
+                  <hr:DataTrigger Value="Play|Pause|Stop" IsRegularExpression="True" Binding="{Binding @Device.SupportedMediaCommands}">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsVisible" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Canvas.Triggers>
+              </hr:Canvas>
+              <hr:Button Width="48" Height="48" IconSize="20" Icon="Next" IsEnabled="True">
+                <hr:Button.Triggers>
+                  <hr:EventTrigger Event="Clicked">
+                    <hr:EventTrigger.Actions>
+                      <hr:DataAction Binding="{Binding @Device.MediaCommand}" Value="SkipForward" />
+                    </hr:EventTrigger.Actions>
+                  </hr:EventTrigger>
+                  <hr:DataTrigger Value="SkipForward" Binding="{Binding @Device.SupportedMediaCommands}" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsEnabled" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Button.Triggers>
+              </hr:Button>
+              <hr:Canvas Width="48" Height="48" IsVisible="False">
+                <hr:Button Width="48" Height="48" IsVisible="False" IconSize="20" Icon="RepeatAll">
+                  <hr:Button.Triggers>
+                    <hr:EventTrigger Event="Clicked">
+                      <hr:EventTrigger.Actions>
+                        <hr:DataAction Binding="{Binding @Device.PlaybackRepeatMode}" Value="All" />
+                      </hr:EventTrigger.Actions>
+                    </hr:EventTrigger>
+                    <hr:DataTrigger Value="^Off$" Binding="{Binding @Device.PlaybackRepeatMode}" IsRegularExpression="True">
+                      <hr:DataTrigger.Setters>
+                        <hr:Setter Property="IsVisible" Value="True" />
+                      </hr:DataTrigger.Setters>
+                    </hr:DataTrigger>
+                  </hr:Button.Triggers>
+                </hr:Button>
+                <hr:Button Width="36" Height="36" IsVisible="False" Margin="6" IconSize="20" Icon="RepeatAll" BorderThickness="0" CornerRadius="18" Background="{StaticResource ForegroundBrush2}">
+                  <hr:Button.Triggers>
+                    <hr:EventTrigger Event="Clicked">
+                      <hr:EventTrigger.Actions>
+                        <hr:DataAction Binding="{Binding @Device.PlaybackRepeatMode}" Value="One" Operator="=" />
+                      </hr:EventTrigger.Actions>
+                    </hr:EventTrigger>
+                    <hr:DataTrigger Value="^All$" Binding="{Binding @Device.PlaybackRepeatMode}" IsRegularExpression="True">
+                      <hr:DataTrigger.Setters>
+                        <hr:Setter Property="IsVisible" Value="True" />
+                      </hr:DataTrigger.Setters>
+                    </hr:DataTrigger>
+                  </hr:Button.Triggers>
+                </hr:Button>
+                <hr:Button Width="36" Height="36" IsVisible="False" Margin="6" IconSize="20" Icon="RepeatOne" BorderThickness="0" CornerRadius="18" Background="{StaticResource ForegroundBrush2}">
+                  <hr:Button.Triggers>
+                    <hr:EventTrigger Event="Clicked">
+                      <hr:EventTrigger.Actions>
+                        <hr:DataAction Binding="{Binding @Device.PlaybackRepeatMode}" Value="Off" Operator="=" />
+                      </hr:EventTrigger.Actions>
+                    </hr:EventTrigger>
+                    <hr:DataTrigger Value="^One$" Binding="{Binding @Device.PlaybackRepeatMode}" IsRegularExpression="True">
+                      <hr:DataTrigger.Setters>
+                        <hr:Setter Property="IsVisible" Value="True" />
+                      </hr:DataTrigger.Setters>
+                    </hr:DataTrigger>
+                  </hr:Button.Triggers>
+                </hr:Button>
+                <hr:Canvas.Triggers>
+                  <hr:DataTrigger Value="RepeatOff" Binding="{Binding @Device.SupportedMediaCommands}" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsVisible" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Canvas.Triggers>
+              </hr:Canvas>
+              <hr:Button Width="36" Height="36" IsVisible="False" Margin="6" IconSize="20" Icon="Shuffle" BorderThickness="0" CornerRadius="18" IsChecked="False" ButtonType="Toggle">
+                <hr:Button.Triggers>
+                  <hr:DataTrigger Value="Enabled" Binding="{Binding @Device.PlaybackShuffle}">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsChecked" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                  <hr:DataTrigger Value="Disabled" Binding="{Binding @Device.PlaybackShuffle}">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsChecked" Value="False" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                  <hr:EventTrigger Event="Checked">
+                    <hr:EventTrigger.Actions>
+                      <hr:DataAction Binding="{Binding @Device.PlaybackShuffle}" Value="Enabled" />
+                    </hr:EventTrigger.Actions>
+                  </hr:EventTrigger>
+                  <hr:EventTrigger Event="Unchecked">
+                    <hr:EventTrigger.Actions>
+                      <hr:DataAction Binding="{Binding @Device.PlaybackShuffle}" Value="Disabled" />
+                    </hr:EventTrigger.Actions>
+                  </hr:EventTrigger>
+                  <hr:Trigger Property="IsChecked" Value="True">
+                    <hr:Trigger.Setters>
+                      <hr:Setter Property="Background" Value="{StaticResource ForegroundBrush2}" />
+                    </hr:Trigger.Setters>
+                  </hr:Trigger>
+                  <hr:DataTrigger Value="ShuffleOn" Binding="{Binding @Device.SupportedMediaCommands}" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsVisible" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Button.Triggers>
+              </hr:Button>
+              <hr:Button Width="48" Height="48" IsVisible="False" IconSize="20" Icon="More">
+                <hr:Button.Triggers>
+                  <hr:EventTrigger Event="Clicked">
+                    <hr:EventTrigger.Actions>
+                      <hr:PropertyAction TargetName="SoundModesGrid" Property="IsVisible" Value="True" />
+                    </hr:EventTrigger.Actions>
+                  </hr:EventTrigger>
+                  <hr:DataTrigger Value="AudioSoundMode" Binding="{Binding @Device.Capabilities}" IsRegularExpression="True">
+                    <hr:DataTrigger.Setters>
+                      <hr:Setter Property="IsVisible" Value="True" />
+                    </hr:DataTrigger.Setters>
+                  </hr:DataTrigger>
+                </hr:Button.Triggers>
+              </hr:Button>
+            </hr:StackPanel>
+            <hr:Button Width="36" Height="36" Margin="6" HorizontalAlignment="Right" IconSize="20" Icon="List" BorderThickness="0" CornerRadius="18" ButtonType="Toggle">
+              <hr:Button.Triggers>
+                <hr:Trigger Property="IsChecked" Value="True">
+                  <hr:Trigger.Setters>
+                    <hr:Setter Property="Background" Value="{StaticResource ForegroundBrush2}" />
+                  </hr:Trigger.Setters>
+                </hr:Trigger>
+                <hr:EventTrigger Event="Checked">
+                  <hr:EventTrigger.Actions>
+                    <hr:PropertyAction TargetName="SourceBrowserGrid" Property="IsVisible" Value="True" />
+                    <hr:PropertyAction TargetName="SourceImageGrid" Property="IsVisible" Value="False" />
+                    <hr:PropertyAction TargetName="MediaPlayerDetails" Property="IsAppBarVisible" Value="False" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+                <hr:EventTrigger Event="Unchecked">
+                  <hr:EventTrigger.Actions>
+                    <hr:PropertyAction TargetName="SourceBrowserGrid" Property="IsVisible" Value="False" />
+                    <hr:PropertyAction TargetName="SourceImageGrid" Property="IsVisible" Value="True" />
+                    <hr:PropertyAction TargetName="MediaPlayerDetails" Property="IsAppBarVisible" Value="True" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+              </hr:Button.Triggers>
+            </hr:Button>
+          </hr:Grid>
+          <hr:Grid Grid.Row="2">
+            <hr:Button Width="48" Height="48" HorizontalAlignment="Left" IconSize="20" Icon="Volume" IsChecked="False" ButtonType="Toggle">
+              <hr:Button.Triggers>
+                <hr:DataTrigger Value="Muted" Binding="{Binding @Device.Mute}">
+                  <hr:DataTrigger.Setters>
+                    <hr:Setter Property="IsChecked" Value="True" />
+                  </hr:DataTrigger.Setters>
+                </hr:DataTrigger>
+                <hr:DataTrigger Value="Unmuted" Binding="{Binding @Device.Mute}">
+                  <hr:DataTrigger.Setters>
+                    <hr:Setter Property="IsChecked" Value="False" />
+                  </hr:DataTrigger.Setters>
+                </hr:DataTrigger>
+                <hr:EventTrigger Event="Checked">
+                  <hr:EventTrigger.Actions>
+                    <hr:DataAction Binding="{Binding @Device.Mute}" Value="Muted" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+                <hr:EventTrigger Event="Unchecked">
+                  <hr:EventTrigger.Actions>
+                    <hr:DataAction Binding="{Binding @Device.Mute}" Value="Unmuted" />
+                  </hr:EventTrigger.Actions>
+                </hr:EventTrigger>
+                <hr:Trigger Property="IsChecked" Value="True">
+                  <hr:Trigger.Setters>
+                    <hr:Setter Property="Icon" Value="Mute" />
+                  </hr:Trigger.Setters>
+                </hr:Trigger>
+              </hr:Button.Triggers>
+            </hr:Button>
+            <hr:Slider Grid.Column="1" VerticalAlignment="Center" Foreground="{StaticResource ForegroundBrush}" Minimum="0" Maximum="100" Value="{Binding @Device.Volume}" Orientation="Horizontal" />
+            <hr:Grid.ColumnDefinitions>
+              <ColumnDefinition Width="48" />
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="16" />
+            </hr:Grid.ColumnDefinitions>
+          </hr:Grid>
+          <hr:Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="12" />
+          </hr:Grid.RowDefinitions>
+        </hr:Grid>
+        <hr:Grid.RowDefinitions>
+          <RowDefinition Height="*" />
+          <RowDefinition Height="Auto" />
+        </hr:Grid.RowDefinitions>
+      </hr:Grid>
+    </hr:Grid>
+    <hr:Grid x:Name="SoundModesGrid" Width="220" IsVisible="False" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{StaticResource BackgroundBrush}">
+      <hr:Label Margin="12,13,0,0" VerticalAlignment="Top" Text="Sound Mode" FontSize="15" />
+      <hr:Button Width="48" Height="48" HorizontalAlignment="Right" VerticalAlignment="Top" IconSize="20" Icon="Close">
+        <hr:Button.Triggers>
+          <hr:EventTrigger Event="Clicked">
+            <hr:EventTrigger.Actions>
+              <hr:PropertyAction TargetName="SoundModesGrid" Property="IsVisible" Value="False" />
+            </hr:EventTrigger.Actions>
+          </hr:EventTrigger>
+        </hr:Button.Triggers>
+      </hr:Button>
+      <hr:Label Opacity=".7" Margin="12,45,0,0" VerticalAlignment="Top" Text="{Binding @Device.SoundMode}" FontSize="13" />
+      <hr:GridView x:Name="SoundModesList" Height="210" Margin="12,75,12,12" HorizontalAlignment="Stretch" VerticalAlignment="Top" ItemsSource="{Binding @Device.SupportedSoundModes}" ItemPadding="24,0,0,0" ItemHeight="48" HorizontalContentAlignment="Left" ItemBackground="{StaticResource ForegroundBrush2}" SelectedItemBackground="{StaticResource ForegroundBrush2}" SelectedItemForeground="#FFFFFFFF" FontSize="15" Columns="1" VerticalSpacing="6">
+        <hr:GridView.Items />
+        <hr:GridView.Triggers>
+          <hr:EventTrigger Event="SelectionChanged">
+            <hr:EventTrigger.Actions>
+              <hr:DataAction Binding="{Binding @Device.SoundMode}" Value="{Binding ElementName=SoundModesList, Path=SelectedValue}" Operator="=" />
+              <hr:PropertyAction TargetName="SoundModesList" Property="SelectedValue" Value="-1" />
+            </hr:EventTrigger.Actions>
+          </hr:EventTrigger>
+        </hr:GridView.Triggers>
+      </hr:GridView>
+    </hr:Grid>
+  </hr:Grid>
+  <hr:ContentPage.PrimaryCommands>
+    <hr:AppBarButton Text="Power" Icon="Power">
+      <hr:AppBarButton.Triggers>
+        <hr:EventTrigger Event="Clicked">
+          <hr:EventTrigger.Actions>
+            <hr:DataAction Binding="{Binding @Device.MediaCommand}" Value="PowerToggle" Operator="=" />
+          </hr:EventTrigger.Actions>
+        </hr:EventTrigger>
+      </hr:AppBarButton.Triggers>
+    </hr:AppBarButton>
+  </hr:ContentPage.PrimaryCommands>
+</hr:ContentPage>
