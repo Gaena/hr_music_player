@@ -65,9 +65,11 @@ function onChangeRequest(device, attribute, value) {
             switch (value) {
                 case "Enabled" :
                     http.get(apiUrl + "command=setPlayerCmd:loopmode:2");
+                    device.SupportedMediaCommands = ["ShuffleOff"].concat(device.SupportedMediaCommands);
                     break;
                 case "Disabled":
                     http.get(apiUrl + "command=setPlayerCmd:loopmode:0");
+                    device.SupportedMediaCommands = ["ShuffleOn"].concat(device.SupportedMediaCommands);
                     break;
                 default : {
                     throw "Invalid attribute"
@@ -119,6 +121,10 @@ function onChangeRequest(device, attribute, value) {
             }
             break;
         }
+        case "InputSource" : {
+            http.get(apiUrl + "command=setPlayerCmd:playLocalList:" + value);
+            break;
+        }
         case "CurPosition" : {
             throw "Unsupported action"
         }
@@ -143,6 +149,7 @@ function onPoll() {
     var r = http.get(apiUrl + "command=getPlayerStatus");
 
     var device = plugin.Devices["MP1"];
+    device.SupportedSoundModes = ["None", "Classic", "Popular", "Jazzy", "Vocal"]
 
     if (device) {
         device.Chanel = r.data.ch
@@ -155,17 +162,21 @@ function onPoll() {
         device.CurPosition = ms2MinStr(r.data.curpos)
         device.TotalLength = ms2MinStr(r.data.totlen)
 
+        device.SupportedMediaCommands = [];
         switch (r.data.status) {
             case "stop" : {
                 device.PlaybackStatus = "Stop";
+                device.SupportedMediaCommands = ["Play"].concat(device.SupportedMediaCommands);
                 break;
             }
             case "pause" : {
                 device.PlaybackStatus = "Pause";
+                device.SupportedMediaCommands = ["Play"].concat(device.SupportedMediaCommands);
                 break;
             }
-            case "start" : {
-                device.PlaybackStatus = "Start";
+            case "play" : {
+                device.PlaybackStatus = "Play";
+                device.SupportedMediaCommands = ["Pause"].concat(device.SupportedMediaCommands);
                 break;
             }
         }
@@ -174,30 +185,84 @@ function onPoll() {
             case "0" : {
                 device.PlaybackShuffle = "Disabled"
                 device.PlaybackRepeatMode = "Off"
+                device.SupportedMediaCommands = ["ShuffleOn"].concat(device.SupportedMediaCommands);
                 break;
             }
             case "1" : {
                 device.PlaybackRepeatMode = "All"
+                device.SupportedMediaCommands = ["ShuffleOn"].concat(device.SupportedMediaCommands);
                 break;
             }
             case "2" : {
                 device.PlaybackShuffle = "Enabled"
+                device.SupportedMediaCommands = ["ShuffleOn"].concat(device.SupportedMediaCommands);
                 break;
             }
             case "-1" : {
                 device.PlaybackRepeatMode = "One"
+                device.SupportedMediaCommands = ["ShuffleOn"].concat(device.SupportedMediaCommands);
                 break;
             }
         }
 
-        if (device.SupportedMediaCommands == null) {
+        switch (r.data.eq) {
+            case "0" : {
+                device.SoundMode = "None";
+                break;
+            }
+            case "1" : {
+                device.SoundMode = "Classic mode";
+                break;
+            }
+            case "2" : {
+                device.SoundMode = "Popular mode";
+                break;
+            }
+            case "3" : {
+                device.SoundMode = "Jazzy mode";
+                break;
+            }
+            case "4" : {
+                device.SoundMode = "Vocal mode";
+                break;
+            }
+
+
+        }
+
+        if (device.SupportedMediaCommands.length === 0) {
             device.SupportedMediaCommands = ["Play", "RepeatOff", "ShuffleOn"];
         }
-        console.log("updated ")
     }
 
-    for (let i = 0; i < device.length; i++) {
-        console.log("[" + i + "]" + device[i])
+    var fileListResponse = http.get(apiUrl + "command=getLocalPlayList");
+    device.PlaylistTitle = fileListResponse.data.num;
+    var fileList = fileListResponse.data.locallist;
+
+    /*var range = fileList.length;
+
+    var playListResponse = http.get(apiUrl + "command=getFileInfo:0:" + range);
+    var playList = playListResponse.data.infolist;
+
+    if (playList.length > 1) {
+        device.SupportedInputSources = [];
+        for (var i = 0; i < playList.length; i++) {
+            var track = {
+                id: i,
+                filename : hex_to_ascii(playList[i].filename),
+                filename : hex_to_ascii(playList[i].filename),
+            }
+        }
+    }*/
+
+    if (fileList.length > 1) {
+        device.PlaylistTitle = fileListResponse.data.num;
+        device.SupportedInputSources = [];
+        for (var i = 0; i < fileList.length; i++) {
+            var name = hex_to_ascii(fileList[i].file);
+            var track = {id: i, name: name}
+            device.SupportedInputSources = [track].concat(device.SupportedInputSources);
+        }
     }
 
 }
@@ -208,7 +273,7 @@ function onSynchronizeDevices() {
     device.Name = "IEAST";
     device.DisplayName = "IEAST";
     device.Capabilities = ["Switch", "AudioBass", "AudioMute", "AudioSoundMode", "AudioTrackData", "AudioTrackData.Album", "AudioTreble", "AudioVolume", "AudioVolumeDecibel", "MediaControl", "MediaGroup", "MediaInputSource", "MediaPlaybackRepeat", "MediaPlaybackShuffle", "MediaPlayback", "MediaPlaybackTime"];
-    device.Attributes = ["Title", "Artist", "Album" , "TotalLength" , "CurPosition"];
+    device.Attributes = ["Title", "Artist", "Album", "TotalLength", "CurPosition", "PlaylistTitle", "Playlist"];
     device.Switch = "On";
 
     plugin.Devices[device.Id] = device;
@@ -239,12 +304,13 @@ function ms2MinStr(ms) {
     ms = ms.trim();
     var min = new Date(+ms).getMinutes().toString();
     if (min.length < 2)
-        min = "0" +  min;
+        min = "0" + min;
     var sec = new Date(+ms).getSeconds().toString();
     if (sec.length < 2)
-        sec ="0" +  sec;
+        sec = "0" + sec;
     return min + ":" + sec;
 }
+
 function time2ms(time) {
     var timeArr = time.toString().split(":");
     var min = +timeArr[0];
